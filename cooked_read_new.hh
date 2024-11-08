@@ -6,19 +6,62 @@
 #include <iostream>
 #include <fstream>
 
-#include "../ala_exception/ala_exception.hh"
-#include "../string/src/String.hh"
+//#include "../ala_exception/ala_exception.hh"
+//#include "../string/src/String.hh"
+#include "../Numcy/header.hh"
 
 #ifndef SUNDRY_COOKED_READ_NEW_HH
 #define SUNDRY_COOKED_READ_NEW_HH
 
 namespace cc_tokenizer
 {
-    template<typename E>
-    cc_tokenizer::String<E> cooked_read(cc_tokenizer::String<E>) throw(ala_exception);
+    /*template<typename E>
+    cc_tokenizer::String<E> cooked_read(cc_tokenizer::String<E>) throw(ala_exception);*/
 
-    template<>
-    cc_tokenizer::String<char> cooked_read(cc_tokenizer::String<char> file_name) throw(ala_exception) 
+    template<typename E = double>
+    E* cooked_read(cc_tokenizer::String<char> file_name, cc_tokenizer::string_character_traits<char>::size_type n) throw(ala_exception)
+    {
+       E* ret = NULL; 
+
+       if (n == 0)
+       {
+           // Please provide and complete this message  
+           throw ala_exception("cooked_read() Error: Number of elements to read must be greater than zero.");
+       }
+
+       std::ifstream file(file_name.c_str(), std::ios::binary);
+
+       if (!file.is_open())
+       {
+           throw ala_exception("cooked_read() Error: Cannot open file to read binary data.");
+       }
+
+       try 
+       {
+           ret = cc_tokenizer::allocator<E>().allocate(n);
+       }
+       catch (std::bad_alloc& e)
+       {
+           file.close();
+
+           throw ala_exception(cc_tokenizer::String<char>("cooked_read() Error: ") + cc_tokenizer::String<char>(e.what()));
+       }
+       catch (std::length_error& e)
+       {
+           file.close();
+
+           throw ala_exception(cc_tokenizer::String<char>("cooked_read() Error: ") + cc_tokenizer::String<char>(e.what()));
+       }
+
+       file.read(reinterpret_cast<char*>(ret), n*sizeof(E)); 
+
+       file.close();
+
+       return ret; 
+    }
+    
+    template<typename E = char>
+    cc_tokenizer::String<E> cooked_read(cc_tokenizer::String<char> file_name) throw(ala_exception) 
     {
         std::fstream file;        
         std::streampos length, i = 0;
