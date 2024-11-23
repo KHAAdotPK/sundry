@@ -39,17 +39,30 @@ namespace cc_tokenizer
             throw ala_exception(cc_tokenizer::String<char>("cooked_write() Error: Failed to open file ") + file_name + cc_tokenizer::String<char>(" for writing."));
         }
 
-        char* ptr = NULL;
+        E* ptr = NULL;
         try 
+        {            
+            ptr = cc_tokenizer::allocator<E>().allocate(data.getShape().getN());
+
+            for (cc_tokenizer::string_character_traits<char>::size_type i = 0; i < data.getShape().getN(); i++)
+            {
+                ptr[i] = data[i];
+            }           
+        }
+        catch (std::bad_alloc& e)
         {
-            ptr = reinterpret_cast<char*>(data.slice(0, data.getShape().getN()));            
+            throw ala_exception(cc_tokenizer::String<char>("cooked_write() Error: ") + e.what());
+        }
+        catch (std::length_error& e)
+        {
+            throw ala_exception(cc_tokenizer::String<char>("cooked_write() Error: ") + e.what());
         }
         catch (ala_exception& e)
         {
             throw ala_exception(cc_tokenizer::String<char>("cooked_write() -> ") + e.what());
         }
 
-        file.write(ptr, data.getShape().getN()*sizeof(E));            
+        file.write((char*)ptr, data.getShape().getN()*sizeof(E));            
 
         // Check for any write errors, make sure that your program stops here
         if (!file.good()) 
@@ -57,7 +70,7 @@ namespace cc_tokenizer
             throw ala_exception("cooked_write() Error: Failed during file write operation.");
         }
         
-        cc_tokenizer::allocator<char>().deallocate(ptr, data.getShape().getN()*sizeof(E));
+        cc_tokenizer::allocator<E>().deallocate(ptr, data.getShape().getN());
 
         file.close();
     }    
