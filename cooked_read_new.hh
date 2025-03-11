@@ -19,6 +19,23 @@ namespace cc_tokenizer
     cc_tokenizer::String<E> cooked_read(cc_tokenizer::String<E>) throw(ala_exception);*/
 
     template<typename E = double>
+    Collective<E> cooked_read(cc_tokenizer::String<char> file_name, Collective<E>& W) throw (ala_exception)
+    {
+        E* ptr = NULL;
+
+        try
+        {
+            ptr = cooked_read<E>(file_name, W.getShape().getN());             
+        }
+        catch(ala_exception& e)
+        {
+            throw ala_exception(cc_tokenizer::String<char>("cooked_read() -> ") + cc_tokenizer::String<char>(e.what()));
+        }
+        
+        return Collective<E>{ptr, W.getShape().copy()};
+    } 
+
+    template<typename E = double>
     E* cooked_read(cc_tokenizer::String<char> file_name, cc_tokenizer::string_character_traits<char>::size_type n) throw(ala_exception)
     {
        E* ret = NULL; 
