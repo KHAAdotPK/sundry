@@ -32,7 +32,7 @@ namespace cc_tokenizer
             throw ala_exception(cc_tokenizer::String<char>("cooked_read() -> ") + cc_tokenizer::String<char>(e.what()));
         }
         
-        return Collective<E>{ptr, W.getShape().copy()};
+        return Collective<E>{ptr, W.getShape()/*.copy()*/};
     } 
 
     template<typename E = double>
